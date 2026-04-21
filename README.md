@@ -62,12 +62,16 @@ git clone https://github.com/againczz/huaweicloud-agent-skills.git \
 
 ### 本地开发（通用）
 
-```bash
-# 符号链接（推荐）
-ln -s /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
+因为本项目为多模块集合，需分别链接每个子模块：
 
-# 或直接复制
-cp -r /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
+```bash
+# 进入本地存放的 agents skills 目录
+mkdir -p ~/.agents/skills && cd ~/.agents/skills
+
+# 为项目的每个子模块创建软链
+for skill in compute networking storage database container security monitoring middleware; do
+  ln -s /path/to/huaweicloud-agent-skills/skills/$skill huaweicloud-$skill
+done
 ```
 
 ## 命令格式与技巧
