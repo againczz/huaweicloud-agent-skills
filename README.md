@@ -25,20 +25,42 @@
 
 ## 安装
 
-### Claude Code（插件市场）
+### Claude Code
 
 ```bash
+# 从插件市场
 /plugin marketplace add againczz/huaweicloud-agent-skills
 /plugin install huaweicloud-agent-skills
-```
 
-### Claude Code / Codex / OpenCode（从 GitHub）
-
-```bash
+# 或直接从 GitHub
 /plugin install https://github.com/againczz/huaweicloud-agent-skills
 ```
 
-### 本地开发
+### Codex (OpenAI)
+
+```bash
+# 克隆到全局 skills 目录
+git clone https://github.com/againczz/huaweicloud-agent-skills.git \
+  ~/.codex/skills/huaweicloud
+
+# 或克隆到项目级 skills 目录
+git clone https://github.com/againczz/huaweicloud-agent-skills.git \
+  .agents/skills/huaweicloud
+```
+
+### OpenCode
+
+```bash
+# 克隆到全局 skills 目录
+git clone https://github.com/againczz/huaweicloud-agent-skills.git \
+  ~/.config/opencode/skills/huaweicloud
+
+# 或克隆到项目级 skills 目录
+git clone https://github.com/againczz/huaweicloud-agent-skills.git \
+  .opencode/skills/huaweicloud
+```
+
+### 本地开发（通用）
 
 ```bash
 # 符号链接（推荐）
