@@ -12,7 +12,7 @@
 - 🗄️ **数据库**：RDS（MySQL/PostgreSQL）、DDS（MongoDB）、DCS（Redis）、GaussDB
 - 🐳 **容器**：CCE 云容器引擎、SWR 容器镜像服务
 - 🔐 **安全**：IAM 统一身份认证
-- 📊 **监控**：CES 云监控、CTS 云审计、SMN 消息通知
+- 📊 **监控**：CES 云监控、CTS 云审计、SMN 消息通知、LTS 云日志
 - 📨 **中间件**：DMS（Kafka/RabbitMQ）、CSS（Elasticsearch）
 
 ## 前提条件
@@ -23,38 +23,80 @@
    hcloud configure init
    ```
 
+## 安装
+
+### Claude Code（插件市场）
+
+```bash
+/plugin marketplace add <owner>/huaweicloud-agent-skills
+/plugin install huaweicloud-agent-skills
+```
+
+### Claude Code（从 GitHub）
+
+```bash
+/plugin install https://github.com/<owner>/huaweicloud-agent-skills
+```
+
+### 本地开发
+
+```bash
+# 符号链接（推荐）
+ln -s /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
+
+# 或直接复制
+cp -r /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
+```
+
 ## 项目结构
 
 ```
 huaweicloud-agent-skills/
-├── SKILL.md                    # 主入口：命令格式、通用技巧、安全准则、服务路由
-├── references/
-│   ├── compute.md              # ECS / BMS / AS / FunctionGraph
-│   ├── networking.md           # VPC / ELB / NAT / EIP / DNS
-│   ├── storage.md              # OBS / EVS / SFS
-│   ├── database.md             # RDS / DDS / DCS / GaussDB
-│   ├── container.md            # CCE / SWR
-│   ├── security.md             # IAM
-│   ├── monitoring.md           # CES / CTS / SMN
-│   └── middleware.md           # DMS (Kafka/RabbitMQ) / CSS (Elasticsearch)
+├── .claude-plugin/
+│   └── marketplace.json          # Claude Code 插件市场配置
+├── SKILL.md                      # 根入口：命令格式、通用技巧、安全准则、服务路由
+├── skills/
+│   ├── compute/
+│   │   ├── SKILL.md              # 计算服务入口 (独立触发)
+│   │   └── reference.md          # ECS / BMS / AS / FunctionGraph 详细参考
+│   ├── networking/
+│   │   ├── SKILL.md              # 网络服务入口 (独立触发)
+│   │   └── reference.md          # VPC / ELB / NAT / EIP / DNS 详细参考
+│   ├── storage/
+│   │   ├── SKILL.md              # 存储服务入口 (独立触发)
+│   │   └── reference.md          # OBS / EVS / SFS 详细参考
+│   ├── database/
+│   │   ├── SKILL.md              # 数据库服务入口 (独立触发)
+│   │   └── reference.md          # RDS / DDS / DCS / GaussDB 详细参考
+│   ├── container/
+│   │   ├── SKILL.md              # 容器服务入口 (独立触发)
+│   │   └── reference.md          # CCE / SWR 详细参考
+│   ├── security/
+│   │   ├── SKILL.md              # 安全身份入口 (独立触发)
+│   │   └── reference.md          # IAM 详细参考
+│   ├── monitoring/
+│   │   ├── SKILL.md              # 监控运维入口 (独立触发)
+│   │   └── reference.md          # CES / CTS / SMN / LTS 详细参考
+│   └── middleware/
+│       ├── SKILL.md              # 中间件入口 (独立触发)
+│       └── reference.md          # DMS / CSS 详细参考
 ├── README.md
 ├── LICENSE
 └── .gitignore
 ```
 
-## 安装
+### 插件化架构说明
 
-### 方式一：符号链接（开发模式）
+每个 `skills/<category>/` 是一个**独立 skill**，拥有自己的：
 
-```bash
-ln -s /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
-```
+- **SKILL.md** — 包含 frontmatter（name + description 触发短语），Agent 根据触发短语精准匹配
+- **reference.md** — 补充文件，包含该类别的详细命令示例和最佳实践
 
-### 方式二：直接复制
-
-```bash
-cp -r /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
-```
+**优势：**
+- ✅ **按需加载**：Agent 只加载用户请求相关的 skill，节省 token
+- ✅ **精准触发**：每个 skill 独立定义触发短语，避免笼统匹配
+- ✅ **独立安装**：支持只安装需要的服务模块
+- ✅ **插件市场**：通过 `.claude-plugin/marketplace.json` 注册全部 8 个 skill
 
 ## 使用示例
 
@@ -81,10 +123,10 @@ cp -r /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
 
 ## 设计理念
 
-参考 [aws-agent-skills](https://github.com/itsmostafa/aws-agent-skills) 的架构：
+参考 [aws-agent-skills](https://github.com/itsmostafa/aws-agent-skills) 的插件化架构：
 
-- **SKILL.md** 作为核心入口，包含命令格式、通用技巧、安全准则和服务速查表
-- **references/** 按服务类别组织详细的命令参考，agent 按需加载相关文件
+- **根 SKILL.md** 作为全局入口，包含通用命令格式、安全准则和服务路由表
+- **skills/** 下每个类别是独立 skill，有自己的触发描述和详细参考
 - 所有知识本地化存储，无需实时联网查询文档，token 高效
 - 操作按安全等级分类（🟢查询 / 🟡变更 / 🔴删除），变更类操作需确认
 
@@ -92,33 +134,21 @@ cp -r /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
 
 1. Fork 本仓库
 2. 创建功能分支
-3. 新增或更新服务参考文件
+3. 新增或更新 `skills/<category>/reference.md`
 4. 提交 Pull Request
 
-### 添加新服务的模板
+### 添加新服务类别
 
-在 `references/` 下对应的分类文件中追加，或新建文件：
-
-```markdown
-## 服务名称
-
-简要说明。
-
-### 常用操作速查
-
-| 操作 | 命令 | 说明 |
-|------|------|------|
-| 查询列表 | `ListXxx` | ... |
-
-### 操作示例
-
-\```bash
-hcloud <Service> <Operation> --cli-region=cn-north-4
-\```
-
-### 最佳实践
-- ...
-```
+1. 创建目录 `skills/<new-category>/`
+2. 创建 `SKILL.md`，包含 frontmatter：
+   ```yaml
+   ---
+   name: huaweicloud-<new-category>
+   description: 华为云xx服务。当用户提到...时触发。
+   ---
+   ```
+3. 创建 `reference.md`，包含命令示例和最佳实践
+4. 在 `.claude-plugin/marketplace.json` 的 skills 数组中添加路径
 
 ## License
 

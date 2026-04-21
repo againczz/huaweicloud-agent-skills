@@ -4,6 +4,7 @@
 - [CES 云监控](#ces-云监控)
 - [CTS 云审计](#cts-云审计)
 - [SMN 消息通知](#smn-消息通知)
+- [LTS 云日志服务](#lts-云日志服务)
 
 ---
 
@@ -293,3 +294,204 @@ hcloud SMN DeleteTopic --topic_urn=<topic-urn> --cli-region=cn-north-4
 1. 创建 SMN 主题并添加订阅（邮件/短信/Webhook）
 2. 在 CES 创建告警规则时，alarm_actions 指向 SMN 主题的 URN
 3. 当监控指标触发告警阈值时，自动通过 SMN 发送通知
+
+---
+
+## LTS 云日志服务
+
+LTS (Log Tank Service) 提供日志采集、存储、查询和分析能力，支持 ECS、CCE、FunctionGraph 等多种日志源的统一管理。
+
+### 核心概念
+
+- **日志组 (Log Group)**：日志的逻辑分组，用于隔离和管理不同业务的日志
+- **日志流 (Log Stream)**：日志组内的日志通道，对应一类具体的日志来源
+- **日志接入**：将 ECS 主机日志、容器日志等采集到 LTS
+
+### 常用操作速查
+
+| 操作 | 命令 | 说明 |
+|------|------|------|
+| 查询日志组列表 | `ListLogGroups` | 列出所有日志组 |
+| 查询日志组详情 | `ShowLogGroup` | 查看单个日志组 |
+| 创建日志组 | `CreateLogGroup` | 新建日志组 |
+| 删除日志组 | `DeleteLogGroup` | 删除日志组 |
+| 查询日志流列表 | `ListLogStreams` | 列出日志流 |
+| 创建日志流 | `CreateLogStream` | 新建日志流 |
+| 删除日志流 | `DeleteLogStream` | 删除日志流 |
+| 查询日志 | `ListLogs` | 搜索日志内容 |
+| 查询结构化配置 | `ListStructuredLogs` | 查看结构化解析规则 |
+| 查询日志转储 | `ListTransfers` | 查看日志转储任务 |
+| 创建日志转储 | `CreateTransfer` | 新建转储到 OBS |
+| 查询主机组 | `ListHostGroups` | 查看日志采集主机组 |
+| 查询接入规则 | `ListAccessConfig` | 查看日志接入配置 |
+
+### 日志组管理
+
+```bash
+# 列出所有日志组
+hcloud LTS ListLogGroups --cli-region=cn-north-4
+
+# 精简输出
+hcloud LTS ListLogGroups \
+  --cli-query="log_groups[].{ID:log_group_id,Name:log_group_name,TTL:ttl_in_days}" \
+  --cli-region=cn-north-4
+
+# 查看日志组详情
+hcloud LTS ShowLogGroup --log_group_id=<group-id> --cli-region=cn-north-4
+
+# 创建日志组（保留 7 天）
+hcloud LTS CreateLogGroup \
+  --cli-jsonInput='{
+    "log_group_name": "my-app-logs",
+    "ttl_in_days": 7
+  }' \
+  --cli-region=cn-north-4
+
+# 创建日志组（保留 30 天）
+hcloud LTS CreateLogGroup \
+  --cli-jsonInput='{
+    "log_group_name": "prod-audit-logs",
+    "ttl_in_days": 30
+  }' \
+  --cli-region=cn-north-4
+
+# 修改日志组保留天数
+hcloud LTS UpdateLogGroup \
+  --log_group_id=<group-id> \
+  --cli-jsonInput='{"ttl_in_days": 30}' \
+  --cli-region=cn-north-4
+
+# 删除日志组（会同时删除组内所有日志流和日志数据！）
+hcloud LTS DeleteLogGroup --log_group_id=<group-id> --cli-region=cn-north-4
+```
+
+### 日志流管理
+
+```bash
+# 列出指定日志组下的日志流
+hcloud LTS ListLogStreams \
+  --log_group_id=<group-id> \
+  --cli-region=cn-north-4
+
+# 精简输出
+hcloud LTS ListLogStreams \
+  --log_group_id=<group-id> \
+  --cli-query="log_streams[].{ID:log_stream_id,Name:log_stream_name}" \
+  --cli-region=cn-north-4
+
+# 创建日志流
+hcloud LTS CreateLogStream \
+  --log_group_id=<group-id> \
+  --cli-jsonInput='{
+    "log_stream_name": "nginx-access"
+  }' \
+  --cli-region=cn-north-4
+
+# 删除日志流
+hcloud LTS DeleteLogStream \
+  --log_group_id=<group-id> \
+  --log_stream_id=<stream-id> \
+  --cli-region=cn-north-4
+```
+
+### 日志查询
+
+```bash
+# 查询日志（最近 1 小时）
+hcloud LTS ListLogs \
+  --log_group_id=<group-id> \
+  --log_stream_id=<stream-id> \
+  --cli-jsonInput='{
+    "start_time": "'$(date -v-1H +%s)'000",
+    "end_time": "'$(date +%s)'000",
+    "limit": 100
+  }' \
+  --cli-region=cn-north-4
+
+# 关键词搜索
+hcloud LTS ListLogs \
+  --log_group_id=<group-id> \
+  --log_stream_id=<stream-id> \
+  --cli-jsonInput='{
+    "start_time": "'$(date -v-1H +%s)'000",
+    "end_time": "'$(date +%s)'000",
+    "keywords": "ERROR",
+    "limit": 50
+  }' \
+  --cli-region=cn-north-4
+
+# 结构化查询（SQL 模式）
+hcloud LTS ListLogs \
+  --log_group_id=<group-id> \
+  --log_stream_id=<stream-id> \
+  --cli-jsonInput='{
+    "start_time": "'$(date -v-1H +%s)'000",
+    "end_time": "'$(date +%s)'000",
+    "is_analysis": true,
+    "analyze_statement": "SELECT status, count(*) as cnt GROUP BY status ORDER BY cnt DESC",
+    "limit": 100
+  }' \
+  --cli-region=cn-north-4
+```
+
+### 日志转储到 OBS
+
+```bash
+# 查看所有转储任务
+hcloud LTS ListTransfers --cli-region=cn-north-4
+
+# 创建日志转储到 OBS（推荐使用 skeleton）
+hcloud LTS CreateTransfer --skeleton > create_transfer.json
+# 关键参数：
+# - log_group_id: 日志组 ID
+# - log_streams[].log_stream_id: 日志流 ID
+# - log_transfer_info.log_storage_format: json 或 raw
+# - log_transfer_info.log_transfer_type: OBS
+# - log_transfer_info.obs_bucket_name: OBS 桶名
+# - log_transfer_info.obs_dir_prefix_name: 目录前缀
+# - log_transfer_info.period: 转储周期(分钟)
+hcloud LTS CreateTransfer --cli-jsonInput=file://create_transfer.json --cli-region=cn-north-4
+```
+
+### 日志接入（主机日志采集）
+
+```bash
+# 查看主机组
+hcloud LTS ListHostGroups --cli-region=cn-north-4
+
+# 查看接入配置
+hcloud LTS ListAccessConfig --cli-region=cn-north-4
+
+# 创建接入配置（推荐 skeleton）
+hcloud LTS CreateAccessConfig --skeleton > create_access.json
+# 关键参数：
+# - access_config_name: 接入名称
+# - access_config_type: AGENT（主机日志）
+# - log_info.log_group_id: 目标日志组
+# - log_info.log_stream_id: 目标日志流
+# - access_config_detail.paths: 采集路径（如 ["/var/log/nginx/*.log"]）
+hcloud LTS CreateAccessConfig --cli-jsonInput=file://create_access.json --cli-region=cn-north-4
+```
+
+### 常见日志保留策略
+
+| 场景 | ttl_in_days | 说明 |
+|------|-------------|------|
+| 开发测试 | 3-7 | 短期调试，节省成本 |
+| 生产运维 | 30 | 日常排查需要 |
+| 安全审计 | 90-180 | 合规要求 |
+| 长期归档 | 365 | 配合 OBS 转储 |
+
+### 最佳实践
+- 按业务或应用划分日志组，同一应用的不同类型日志（access / error / app）用不同日志流
+- 生产环境启用结构化解析，便于 SQL 分析和告警
+- 大量日志数据建议配置 OBS 转储，降低存储成本
+- 配合 CES 告警、SMN 通知实现日志关键词告警
+
+### 典型组合：LTS + CES + SMN 日志告警
+
+1. 在 LTS 中创建日志组和日志流，配置主机日志采集
+2. 设置结构化解析，将关键字段（如 status、level）提取为指标
+3. 在 CES 中基于 LTS 日志指标创建告警规则
+4. 通过 SMN 发送告警通知（邮件/短信/Webhook）
+

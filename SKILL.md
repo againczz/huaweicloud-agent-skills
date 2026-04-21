@@ -7,12 +7,6 @@ description: 使用 KooCLI (hcloud) 管理华为云资源。覆盖 ECS、VPC、O
 
 通过华为云命令行工具 KooCLI（`hcloud`）管理华为云上的各类资源。KooCLI 对接华为云 API Explorer，支持调用所有已开放的华为云 API。
 
-- [命令格式](#命令格式)
-- [通用技巧](#通用技巧)
-- [安全准则](#安全准则)
-- [服务速查](#服务速查)
-- [按服务查阅详细参考](#按服务查阅详细参考)
-
 ## 命令格式
 
 所有 hcloud 命令遵循统一格式：
@@ -184,6 +178,7 @@ hcloud ECS ListServersDetails --cli-profile=prod
 | 云监控 | `CES` | 指标监控/告警 |
 | 云审计 | `CTS` | API 操作审计 |
 | 消息通知 | `SMN` | 消息主题/订阅/发布 |
+| 云日志 | `LTS` | 日志采集/查询/分析 |
 
 ### 应用中间件
 
@@ -192,61 +187,22 @@ hcloud ECS ListServersDetails --cli-profile=prod
 | 分布式消息 | `DMS` | Kafka/RabbitMQ |
 | 云搜索 | `CSS` | Elasticsearch |
 
-## 常见工作流
-
-### 快速查看资源概况
-
-```bash
-# 查看所有 ECS 实例
-hcloud ECS ListServersDetails --cli-region=cn-north-4
-
-# 查看所有 VPC
-hcloud VPC ListVpcs --cli-region=cn-north-4
-
-# 查看所有安全组
-hcloud VPC ListSecurityGroups --cli-region=cn-north-4
-
-# 查看所有弹性公网 IP
-hcloud EIP ListPublicips --cli-region=cn-north-4
-```
-
-### 查找特定资源
-
-```bash
-# 按名称过滤 ECS（使用 JMESPath）
-hcloud ECS ListServersDetails --cli-query="servers[?name=='my-server']"
-
-# 按状态过滤
-hcloud ECS ListServersDetails --cli-query="servers[?status=='ACTIVE']"
-```
-
-### 批量操作模式
-
-对于批量创建/修改场景，推荐 JSON 模板 + shell 循环：
-
-```bash
-# 批量停止 ECS
-for id in server-id-1 server-id-2 server-id-3; do
-  hcloud ECS BatchStopServers --cli-jsonInput="{\"os-stop\":{\"servers\":[{\"id\":\"$id\"}]}}"
-done
-```
-
 ## 按服务查阅详细参考
 
-当需要某个服务的详细操作示例和最佳实践时，查阅以下参考文件：
+每个服务类别是一个独立的 skill，包含详细的命令示例和最佳实践：
 
-| 类别 | 参考文件 | 覆盖内容 |
-|------|----------|----------|
-| 计算 | `references/compute.md` | ECS、BMS、AS、FunctionGraph |
-| 网络 | `references/networking.md` | VPC、ELB、NAT、EIP、DNS |
-| 存储 | `references/storage.md` | OBS、EVS、SFS |
-| 数据库 | `references/database.md` | RDS、DDS、DCS、GaussDB |
-| 容器 | `references/container.md` | CCE、SWR |
-| 安全与身份 | `references/security.md` | IAM |
-| 监控与运维 | `references/monitoring.md` | CES、CTS、SMN |
-| 中间件 | `references/middleware.md` | DMS、CSS |
+| 类别 | Skill 路径 | 覆盖内容 |
+|------|-----------|----------|
+| 计算 | `skills/compute/` | ECS、BMS、AS、FunctionGraph |
+| 网络 | `skills/networking/` | VPC、ELB、NAT、EIP、DNS |
+| 存储 | `skills/storage/` | OBS、EVS、SFS |
+| 数据库 | `skills/database/` | RDS、DDS、DCS、GaussDB |
+| 容器 | `skills/container/` | CCE、SWR |
+| 安全与身份 | `skills/security/` | IAM |
+| 监控与运维 | `skills/monitoring/` | CES、CTS、SMN、LTS |
+| 中间件 | `skills/middleware/` | DMS、CSS |
 
-根据用户请求的服务类型，读取对应的参考文件获取详细命令和模式。
+根据用户请求的服务类型，读取对应 skill 的 `SKILL.md` 和 `reference.md` 获取详细命令和模式。
 
 ## 故障排查通用步骤
 
