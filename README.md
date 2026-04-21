@@ -70,55 +70,80 @@ ln -s /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
 cp -r /path/to/huaweicloud-agent-skills ~/.agents/skills/huaweicloud
 ```
 
+## 命令格式与技巧
+
+所有 hcloud 命令遵循统一格式：
+
+```bash
+hcloud <Service> <Operation> [--参数名=值 ...]
+```
+
+### 通用技巧
+
+- **获取帮助**：`hcloud ECS --help` 或 `hcloud ECS ListServersDetails --help`
+- **交互模式**：增加 `--interactive` 参数自动提示
+- **干运行（预检）**：增加 `--dryrun` 测试操作边界而不实际执行
+- **调试模式**：增加 `--debug` 查看底层 API 请求和响应报文
+- **生成模板**：`hcloud ECS CreateServers --skeleton > create_ecs.json`
+- **指定区域**：`--cli-region=cn-north-4` 
+- **多配置组**：`--cli-profile=prod`
+
+### 安全准则（Agent 需知）
+
+- 🟢 **安全（List*, Show*, Get*）**：只读查询，可直接执行
+- 🟡 **注意（Create*, Update*, Add*）**：会创建/修改资源，需二次校验参数
+- 🔴 **危险（Delete*, Remove*, Batch*Delete*）**：不可逆操作，执行前必须确认目标资源 ID/名称
+
+
 ## 项目结构
 
 ```
 huaweicloud-agent-skills/
 ├── .claude-plugin/
 │   └── marketplace.json          # Claude Code 插件市场配置
-├── SKILL.md                      # 根入口：命令格式、通用技巧、安全准则、服务路由
 ├── skills/
 │   ├── compute/
 │   │   ├── SKILL.md              # 计算服务入口 (独立触发)
 │   │   └── reference.md          # ECS / BMS / AS / FunctionGraph 详细参考
 │   ├── networking/
-│   │   ├── SKILL.md              # 网络服务入口 (独立触发)
+│   │   ├── SKILL.md              # 网络服务入口
 │   │   └── reference.md          # VPC / ELB / NAT / EIP / DNS 详细参考
 │   ├── storage/
-│   │   ├── SKILL.md              # 存储服务入口 (独立触发)
+│   │   ├── SKILL.md              # 存储服务入口
 │   │   └── reference.md          # OBS / EVS / SFS 详细参考
 │   ├── database/
-│   │   ├── SKILL.md              # 数据库服务入口 (独立触发)
+│   │   ├── SKILL.md              # 数据库服务入口
 │   │   └── reference.md          # RDS / DDS / DCS / GaussDB 详细参考
 │   ├── container/
-│   │   ├── SKILL.md              # 容器服务入口 (独立触发)
+│   │   ├── SKILL.md              # 容器服务入口
 │   │   └── reference.md          # CCE / SWR 详细参考
 │   ├── security/
-│   │   ├── SKILL.md              # 安全身份入口 (独立触发)
+│   │   ├── SKILL.md              # 安全身份入口
 │   │   └── reference.md          # IAM 详细参考
 │   ├── monitoring/
-│   │   ├── SKILL.md              # 监控运维入口 (独立触发)
+│   │   ├── SKILL.md              # 监控运维入口
 │   │   └── reference.md          # CES / CTS / SMN / LTS 详细参考
 │   └── middleware/
-│       ├── SKILL.md              # 中间件入口 (独立触发)
+│       ├── SKILL.md              # 中间件入口
 │       └── reference.md          # DMS / CSS 详细参考
 ├── README.md
 ├── LICENSE
 └── .gitignore
 ```
 
-### 插件化架构说明
+### 插件化架构说明 (Monorepo)
 
-每个 `skills/<category>/` 是一个**独立 skill**，拥有自己的：
+本项目是一个 **Skill 集合（Monorepo）**，它不包含根级别的 `SKILL.md`。
 
-- **SKILL.md** — 包含 frontmatter（name + description 触发短语），Agent 根据触发短语精准匹配
-- **reference.md** — 补充文件，包含该类别的详细命令示例和最佳实践
+每个 `skills/<category>/` 是一个**完全独立的 skill**，拥有自己的：
+
+- **SKILL.md** — 包含 frontmatter（name + description 触发短语），Agent 根据触发短语精准匹配。
+- **reference.md** — 补充文件，包含该类别的详细命令示例和最佳实践。
 
 **优势：**
-- ✅ **按需加载**：Agent 只加载用户请求相关的 skill，节省 token
-- ✅ **精准触发**：每个 skill 独立定义触发短语，避免笼统匹配
-- ✅ **独立安装**：支持只安装需要的服务模块
-- ✅ **插件市场**：通过 `.claude-plugin/marketplace.json` 注册全部 8 个 skill
+- ✅ **彻底解耦**：避免所有服务的指令堆砌在一起，Agent 脑容量更清晰。
+- ✅ **按需加载**：支持用户只加载需要的服务模块（如只链接 `skills/compute`）。
+- ✅ **精准触发**：每个 skill 独立定义触发短语，避免大一统匹配带来的噪音。
 
 ## 使用示例
 
@@ -128,38 +153,34 @@ huaweicloud-agent-skills/
 # 查询
 "帮我看一下 cn-north-4 的 ECS 列表"
 "查询一下我们的 VPC 和子网"
-"看看 RDS 实例的状态"
 
 # 创建
 "创建一个安全组，开放 80 和 443 端口"
-"申请一个 5M 带宽的弹性公网 IP"
 
 # 运维
 "查一下这台 ECS 最近一小时的 CPU 使用率"
-"帮我给 Kafka 集群新增一个 topic，3 分区 3 副本"
 
 # 排查
 "这个 ECS 为什么连不上？帮我看看安全组规则"
 "RDS 慢查询日志看一下最近有没有问题"
 ```
 
-## 设计理念
+## 常见错误排查
 
-参考 [aws-agent-skills](https://github.com/itsmostafa/aws-agent-skills) 的插件化架构：
+| 错误码 | 含义 | 处理方式 |
+|--------|------|----------|
+| `APIGW.0301` | IAM 认证失败 | 检查配置 `hcloud configure show` 或 AK/SK |
+| `Ecs.0005` | ECS 配额不足 | 前往控制台申请扩容配额 |
+| `VPC.0101` | VPC 配额不足 | 前往控制台申请扩容配额 |
+| `404` | 资源不存在 | 确认资源 ID 是否正确，或 Region 是否匹配 |
 
-- **根 SKILL.md** 作为全局入口，包含通用命令格式、安全准则和服务路由表
-- **skills/** 下每个类别是独立 skill，有自己的触发描述和详细参考
-- 所有知识本地化存储，无需实时联网查询文档，token 高效
-- 操作按安全等级分类（🟢查询 / 🟡变更 / 🔴删除），变更类操作需确认
+如果出现 "Unsupported operation" 或服务找不到，请更新元数据：
+```bash
+hcloud meta download
+hcloud configure set --cli-offline=false
+```
 
-## 贡献
-
-1. Fork 本仓库
-2. 创建功能分支
-3. 新增或更新 `skills/<category>/reference.md`
-4. 提交 Pull Request
-
-### 添加新服务类别
+## 贡献与添加新服务
 
 1. 创建目录 `skills/<new-category>/`
 2. 创建 `SKILL.md`，包含 frontmatter：
