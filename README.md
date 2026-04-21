@@ -25,7 +25,7 @@
 
 ## 安装
 
-### Claude Code / Codex / OpenCode（插件市场）
+### Claude Code（插件市场）
 
 ```bash
 /plugin marketplace add againczz/huaweicloud-agent-skills
