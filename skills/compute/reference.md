@@ -31,8 +31,8 @@
 ### 查询操作
 
 ```bash
-# 列出所有 ECS 实例
-hcloud ECS ListServersDetails --cli-region=cn-north-4
+# 列出所有 ECS 实例（注意：API 默认仅返回 25 条，查全量需调大 --limit）
+hcloud ECS ListServersDetails --limit=1000 --cli-region=cn-north-4
 
 # 过滤指定名称的服务器
 hcloud ECS ListServersDetails --name=my-server --cli-region=cn-north-4
