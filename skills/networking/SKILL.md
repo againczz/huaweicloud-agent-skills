@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-networking
-description: 华为云网络服务 (VPC/ELB/NAT/EIP/DNS)。当用户提到虚拟私有云、VPC、子网、安全组、安全组规则、弹性负载均衡、ELB、NAT网关、弹性公网IP、EIP、DNS解析、域名记录、路由表、端口转发、SNAT、DNAT 时触发。
+description: 华为云网络服务 (VPC/ELB/NAT/EIP/DNS)。当结果包含大量资源（如大量私有 IP 或安全组规则）时，需注意华为云 API 默认仅返回 25 条。若结果恰好为 25 条或 count 字段大于列表长度，应使用 --limit 或 --marker 获取全量。
 ---
 
 # 华为云网络服务

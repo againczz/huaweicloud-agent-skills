@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-storage
-description: 华为云存储服务 (OBS/EVS/SFS)。当用户提到对象存储、OBS、桶、上传下载文件、云硬盘、EVS、磁盘扩容、快照、弹性文件服务、SFS、NFS共享存储时触发。
+description: 华为云存储服务 (OBS/EVS/SFS)。注意：EVS/SFS 等 API 默认仅返回 25 条。若结果恰好为 25 条或 count 字段大于列表长度，应使用 --limit 或 --marker 获取全量。OBS 操作 (hcloud obs) 若对象极多，需注意分页浏览。
 ---
 
 # 华为云存储服务

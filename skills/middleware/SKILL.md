@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-middleware
-description: 华为云中间件服务 (DMS/CSS)。当用户提到分布式消息服务、DMS、Kafka、RabbitMQ、Topic、消费组、云搜索服务、CSS、Elasticsearch、ES集群、搜索引擎时触发。
+description: 华为云中间件服务 (Kafka/RabbitMQ/RocketMQ/CSS)。当查询大量 Topic、消费组或索引列表时，需注意 API 默认仅返回 25 条。若结果恰好为 25 条或 count 字段大于列表长度，应使用 --limit 或 --marker 获取全量。
 ---
 
 # 华为云中间件服务

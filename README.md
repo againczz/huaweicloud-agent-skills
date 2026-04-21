@@ -84,7 +84,9 @@ hcloud <Service> <Operation> [--参数名=值 ...]
 
 ### 通用技巧
 
-- **突破分页限制 (Agent 重点)**：华为云绝大多数查询接口（如 ECS、VPC 的 `List*`）**默认仅返回 25 条数据**。如果要统计总数或遍历全量资源，**务必在命令中加上大数值的分页参数**，例如 `--limit=1000`。
+- **智能分页处理 (Agent 核心)**：
+    *   **现象识别**：华为云 API 默认只返回 25 条资源。如果返回列表长度恰好为 25，或 JSON 中包含 `"count"` 字段且大于列表长度，说明存在分页。
+    *   **应对方案**：Agent 应优先通过 `--cli-query="count"` 统计总数报给用户。若需查全量，使用 `--limit=1000` 或配合 `next_marker` 进行分次查询。
 - **获取帮助**：`hcloud ECS --help` 或 `hcloud ECS ListServersDetails --help`
 - **交互模式**：增加 `--interactive` 参数自动提示
 - **干运行（预检）**：增加 `--dryrun` 测试操作边界而不实际执行

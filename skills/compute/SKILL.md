@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-compute
-description: 华为云计算服务 (ECS/BMS/AS/FunctionGraph)。当用户提到弹性云服务器、ECS、裸金属、BMS、弹性伸缩、AS、函数工作流、FunctionGraph、Serverless、云服务器创建删除启停、变更规格、查看实例列表时触发。
+description: 华为云计算服务 (ECS/BMS/AS/FunctionGraph)。当回复包含大量实例列表时，需注意华为云 API 默认仅返回 25 条数据。若结果恰好为 25 条或 count 字段大于列表长度，应使用 --limit 或 --marker 获取全量。
 ---
 
 # 华为云计算服务

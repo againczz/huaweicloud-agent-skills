@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-container
-description: 华为云容器服务 (CCE/SWR)。当用户提到云容器引擎、CCE、Kubernetes、K8s、集群、节点、节点池、kubeconfig、容器镜像服务、SWR、Docker镜像、镜像仓库、镜像推送拉取时触发。
+description: 华为云容器服务 (CCE/SWR)。当查询集群、节点或镜像列表时，需注意 API 默认仅返回 25 条。若结果恰好为 25 条或 count 字段大于列表长度，应使用 --limit 或 --marker 获取全量。
 ---
 
 # 华为云容器服务

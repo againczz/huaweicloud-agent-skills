@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-monitoring
-description: 华为云监控与运维服务 (CES/CTS/SMN/LTS)。当用户提到云监控、CES、CPU使用率、内存监控、指标、告警、告警规则、云审计、CTS、操作记录、审计日志、消息通知、SMN、订阅、邮件通知、短信通知、云日志、LTS、日志组、日志流、日志查询、日志采集、日志转储时触发。
+description: 华为云监控与运维服务 (CES/CTS/SMN/LTS)。当查询历史指标数据、审计日志或日志流时，数据量可能极大，需注意 API 默认分页限制。若结果恰好为 25 条或包含 marker/next_marker，应使用 --limit 或翻页参数获取全量。
 ---
 
 # 华为云监控与运维服务

@@ -1,6 +1,6 @@
 ---
 name: huaweicloud-database
-description: 华为云数据库服务 (RDS/DDS/DCS/GaussDB)。当用户提到关系型数据库、RDS、MySQL、PostgreSQL、文档数据库、DDS、MongoDB、分布式缓存、DCS、Redis、Memcached、GaussDB、高斯数据库、数据库备份、慢日志、数据库扩容时触发。
+description: 华为云数据库服务 (RDS/DDS/DCS/GaussDB)。由于数据库实例和备份往往较多，需注意 API 默认仅返回 25 条。若结果恰好为 25 条或 count 字段大于列表长度，应使用 --limit 或 --marker 获取全量。
 ---
 
 # 华为云数据库服务

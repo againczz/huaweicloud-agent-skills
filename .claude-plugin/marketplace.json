@@ -2,7 +2,7 @@
   "name": "huaweicloud-agent-skills",
   "owner": {
     "name": "cuizhengze",
-    "email": ""
+    "email": "cui.zhengze@vectoragr.com"
   },
   "metadata": {
     "description": "华为云 KooCLI 资源管理技能集合，覆盖 20+ 华为云核心服务",
