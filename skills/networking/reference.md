@@ -27,22 +27,27 @@ VPC 是云上的隔离网络环境。
 
 ### 分页与统计 (Agent 技巧)
 
+> [!CAUTION]
+> **v3 接口参数索引**：VPC v3 接口（如查询安全组规则）对于某些 ID 参数采用数组形式。
+> **错误示例**：`--security_group_id=<id>` (会报错 Invalid parameter)
+> **正确示例**：`--security_group_id.1=<id>` (必须带 `.1`)
+
 ```bash
 # 智能统计 VPC 数量
 hcloud VPC ListVpcs --cli-query="count"
 
-# 获取安全组规则全量 (规则往往很多，务必检查)
-hcloud VPC ListSecurityGroupRules --security_group_id=<sg-id> --limit=100
+# 获取安全组规则全量 (使用 .1 索引参数)
+hcloud VPC ListSecurityGroupRules --security_group_id.1=<sg-id> --limit=100
 ```
 
 ### 常用命令示例
 
 ```bash
+# 过滤指定名称的安全组 (建议使用 JMESPath，因为部分 v3 接口不支持 --name)
+hcloud VPC ListSecurityGroups --cli-query="security_groups[?name=='default'].id"
+
 # 查询子网关联的路由表
 hcloud VPC ShowSubnet --subnet_id=<id> --cli-query="subnet.neutron_subnet_id"
-
-# 批量创建安全组规则
-hcloud VPC BatchCreateSecurityGroupRules --cli-jsonInput='...'
 ```
 
 ---

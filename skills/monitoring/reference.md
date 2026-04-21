@@ -67,15 +67,27 @@ hcloud CTS ListTraces --service_type=ECS --resource_type=server --trace_name=del
 | 操作 | 命令 | 说明 |
 |------|------|------|
 | 查询日志组 | `ListLogGroups` | 获取日志组列表 |
-| 查询日志流 | `ListLogStream` | 获取组下所有日志流 |
+| 查询日志流 | `ListLogStream` | 获取组下所有日志流 (注意是单数) |
 | 检索日志内容 | `ListLogs` | 搜索具体日志条目 |
-| 查询图表/柱状图 | `ListLogHistogram` | 查看日志分布统计 |
+| 查询图表 | `ListLogHistogram` | 查看日志分布统计 |
 
 ### 分页与统计 (Agent 技巧)
 
+> [!IMPORTANT]
+> **LTS 参数陷阱**：不同接口的参数名极其不统一。
+> - `ListLogStream`/`ListLogs` 使用：`--log_group_id` / `--log_stream_id`
+> - `ListLogHistogram` 使用：`--group_id` / `--stream_id` (少了 `log_` 前缀)
+>
+> **时间戳要求**：LTS 查询涉及的时间戳均为 **毫秒级 (ms)**（例如 `1713686400000`）。
+
 ```bash
-# 智能检索最近 50 条日志
-hcloud LTS ListLogs --log_group_id=<group-id> --log_stream_id=<stream-id> --limit=50
+# 智能检索最近 50 条日志 (需要起止时间戳，请先计算时间)
+hcloud LTS ListLogs \
+  --log_group_id=<group-id> \
+  --log_stream_id=<stream-id> \
+  --start_time=<ms_timestamp> \
+  --end_time=<ms_timestamp> \
+  --limit=50
 
 # 统计日志组数量
 hcloud LTS ListLogGroups --cli-query="length(log_groups)"
